@@ -75,9 +75,10 @@ areaPlacar = {
 	largura: larguraJanela,
 	altura: 100,
 	cron:{
+		disp: false,
 		hors: 0,
 		mins: 0,
-		segs: 0,
+		segs: -1,
 		vis: function(n){
 			if(String(n).length<2)
 				return "0" + n;
@@ -92,33 +93,31 @@ areaPlacar = {
 		contextoRenderizacao.fillRect(this.x, this.y, larguraJanela, this.altura,);
 		contextoRenderizacao.fillStyle = "#ffffff";
 		contextoRenderizacao.font = "50px terminal";
-		contextoRenderizacao.fillText(this.execCron(), 10, 50);
+		contextoRenderizacao.fillText(this.mostrVis(), 10, 50);
 	},
 
 
-	execCron: function(teste){
-
-		setInterval(function(){
-			this.cron.segs++;
-			if(this.cron.segs > 59){
-				this.cron.segs = 0;
-				this.cron.mins++;
-			}
-			if(this.cron.mins > 59){
-				this.cron.mins = 0;
-				this.cron.hors++;
-			}
-			return this.cron.vis(this.cron.hors) +
-			":" + this.cron.vis(this.cron.mins) +
-			":" + this.cron.vis(this.cron.segs);
-		}, 1000);
-	},
-
-	adic0: function(temp, limit){
-		if(temp >= 0 && temp <=9){
-			temp = "0" + temp;
+	execCron: function(){
+		this.cron.segs++;
+		if(this.cron.segs > 59){
+			this.cron.segs = 0;
+			this.cron.mins++;
 		}
-		return temp;
+		if(this.cron.mins > 59){
+			this.cron.mins = 0;
+			this.cron.hors++;
+		}
+	},
+
+	mostrVis: function(){
+		return this.cron.vis(this.cron.hors) +
+		":" + this.cron.vis(this.cron.mins) +
+		":" + this.cron.vis(this.cron.segs);
+	},
+
+	atualiza: function(){
+		if(this.cron.disp)
+			setInterval(areaPlacar.execCron(), 1000);
 	}
 },
 
@@ -270,8 +269,13 @@ function atualiza(){
 	frames++;
 
 	// O jogo esta executando?
-	if(estadoJogo == estado.rodando)
+	if(estadoJogo == estado.rodando){
 		arrMeteoritos.atualiza();	// Atualiza o array de meteoritos
+		if(areaPlacar.cron.disp == false){
+			areaPlacar.cron.disp = true;
+			areaPlacar.atualiza();
+		}
+	}
 
 	// O jogador perdeu?
 	else if(estadoJogo == estado.terminou){
