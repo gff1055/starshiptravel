@@ -3,6 +3,7 @@ larguraJanela = inicializa()["largura"],	// Recebe a largura da janela do jogo
 alturaJanela = inicializa()["altura"],	// Recebe a altura da janela do jogo
 frames = 0,
 estadoJogo,	// Armazena o estado atual do jogo
+teste = 0;
 
 // Estados do jogo
 estado = {
@@ -74,52 +75,35 @@ areaPlacar = {
 	y: 0,
 	largura: larguraJanela,
 	altura: 100,
-	cron:{
-		disp: false,
-		hors: 0,
-		mins: 0,
-		segs: -1,
-		vis: function(n){
-			if(String(n).length<2)
-				return "0" + n;
-			else
-				return n;	
-
-		}
-	},
-
+	
 	desenha: function(){
 		contextoRenderizacao.fillStyle = "blue";
 		contextoRenderizacao.fillRect(this.x, this.y, larguraJanela, this.altura,);
 		contextoRenderizacao.fillStyle = "#ffffff";
 		contextoRenderizacao.font = "50px terminal";
-		contextoRenderizacao.fillText(this.mostrVis(), 10, 50);
+		contextoRenderizacao.fillText(cron.mostVis(), 10, 50);
 	},
-
-
-	execCron: function(){
-		this.cron.segs++;
-		if(this.cron.segs > 59){
-			this.cron.segs = 0;
-			this.cron.mins++;
-		}
-		if(this.cron.mins > 59){
-			this.cron.mins = 0;
-			this.cron.hors++;
-		}
-	},
-
-	mostrVis: function(){
-		return this.cron.vis(this.cron.hors) +
-		":" + this.cron.vis(this.cron.mins) +
-		":" + this.cron.vis(this.cron.segs);
-	},
-
-	atualiza: function(){
-		if(this.cron.disp)
-			setInterval(areaPlacar.execCron(), 1000);
-	}
 },
+
+cron = {
+	disp: 0,
+	hors: 0,
+	mins: 0,
+	segs: 0,
+	formatVis: function(n){
+		if(String(n).length<2)
+			return "0" + n;
+		else
+			return n;
+	},
+
+	mostVis: function(){
+		return this.formatVis(this.hors) +
+		":" + this.formatVis(this.mins) +
+		":" + this.formatVis(this.segs);
+	},
+},
+
 
 // Objeto que representa os meteoritos
 arrMeteoritos = {
@@ -191,6 +175,21 @@ arrMeteoritos = {
 };
 
 
+
+function execCron(){
+	cron.segs++;
+	if(cron.segs > 59){
+		cron.segs = 0;
+		cron.mins++;
+	}
+	if(cron.mins > 59){
+		cron.mins = 0;
+		cron.hors++;
+	}
+}
+
+
+
 // Funcao para inicializar as dimensoes de execucao do jogo
 function inicializa(){
 	var dimensao = [];	// Array que armazena as dimensoes do jogo
@@ -205,6 +204,7 @@ function inicializa(){
 
 	return dimensao;
 }
+
 
 
 // Funcao que recebe os comandos do teclado e os envia para o jogo
@@ -233,7 +233,6 @@ function teclado(){
 				nave.x = nave.x - nave.velocidadeDesvio;
 		}
 
-
 		else if (event.key == "ArrowRight"){
 			if(nave.x + nave.largura >= larguraJanela - 50)
 				nave.x = larguraJanela - 50 - nave.largura ;
@@ -244,8 +243,10 @@ function teclado(){
 	}
 	
 	// O jogo esta pronto para iniciar e o usuario apertou a tecla ENTER?
-	else if(estadoJogo == estado.aIniciar && event.key == "Enter")
-		estadoJogo = estado.rodando;	// O estado do jogo é setado para RODANDO
+	else if(estadoJogo == estado.aIniciar && event.key == "Enter"){
+		estadoJogo = estado.rodando;	// O estado do jogo é setado para RODANDo
+		
+	}
 
 	// O jogo terminou e o usuario apertou a tecla ENTER?
 	else if(estadoJogo == estado.terminou && event.key == "Enter"){
@@ -256,12 +257,14 @@ function teclado(){
 }
 
 
+
 // Metodo para executar o jogo
 function roda(){
 	atualiza();	// atualiza os caracteres do jogo
 	desenha();	// Desenha os caracteres do jogo
 	window.requestAnimationFrame(roda);	// Reexecuta a funcao roda indefinidamente
 }
+
 
 
 // Metodo para atualizar o jogo
@@ -271,15 +274,16 @@ function atualiza(){
 	// O jogo esta executando?
 	if(estadoJogo == estado.rodando){
 		arrMeteoritos.atualiza();	// Atualiza o array de meteoritos
-		if(areaPlacar.cron.disp == false){
-			areaPlacar.cron.disp = true;
-			areaPlacar.atualiza();
+		if(!cron.disp){
+			cron.disp = setInterval(execCron, 1000);
 		}
 	}
 
 	// O jogador perdeu?
 	else if(estadoJogo == estado.terminou){
 		nave.reset();
+		if(cron.disp)
+			clearInterval(cron.disp);
 	}
 }
 
@@ -310,7 +314,7 @@ function desenha(){
 		contextoRenderizacao.fillStyle = 'red';	// Seta a cor
 		contextoRenderizacao.fillRect(larguraJanela/2-50, alturaJanela/2-50, 100, 100 );	// Desenha o retangulo
 	}
-
+	
 	areaPlacar.desenha();	// Desenha a area que exibe o placar
 }
 
