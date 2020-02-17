@@ -82,15 +82,14 @@ areaPlacar = {
 	y: 0,
 	largura: larguraJanela,
 	altura: 100,
-	final: 0,
-
 
 	desenha: function(){
-		//contextoRenderizacao.fillStyle = "blue";
-		//contextoRenderizacao.fillRect(this.x, this.y, larguraJanela, this.altura,);
-		//contextoRenderizacao.fillStyle = "#ffffff";
-		//contextoRenderizacao.font = "50px Arial";
-		//contextoRenderizacao.fillText(cron.mostrVis(), 10, 60);
+		contextoRenderizacao.fillStyle = "blue";
+		contextoRenderizacao.fillRect(this.x, this.y, larguraJanela, this.altura,);
+		contextoRenderizacao.fillStyle = "#ffffff";
+		contextoRenderizacao.font = "50px Arial";
+		contextoRenderizacao.fillText(cron.mostrVis(), 10, 60);
+
 	},
 },
 
@@ -100,6 +99,7 @@ cron = {
 	hors: 0,
 	mins: 0,
 	segs: 0,
+	final: 0,
 
 
 	formatVis: function(n){
@@ -303,7 +303,7 @@ function atualiza(){
 	// O jogador perdeu?
 	else if(estadoJogo == estado.terminou){
 		nave.reset();
-		areaPlacar = cron.mostrVis();
+		cron.final = cron.mostrVis();
 		if(cron.disp)
 			clearInterval(cron.disp);
 	}
@@ -315,16 +315,18 @@ function desenha(){
 	contextoRenderizacao.fillStyle = '#06004c';	// Definindo a cor de fundo do jogo
 	contextoRenderizacao.fillRect(0, 0, larguraJanela, alturaJanela);	// Desenhamdo o fundo do jogo (o espaço)
 
+	
+
 	// O jogo esta pronto para iniciar?
 	if(estadoJogo == estado.aIniciar){
 
 		// Exibe uma tela verde de inicio de jogo
-		//contextoRenderizacao.fillStyle = 'green';	// setando a cor	
-		//contextoRenderizacao.fillRect(larguraJanela/2-50, alturaJanela/2-50, 100, 100);	// Desenhando o retangulo
-		contextoRenderizacao.fillStyle = "#ffffff";
-		console.log("olha a pedra");
-		contextoRenderizacao.font = "50px Arial";
-		contextoRenderizacao.fillText("GO", 100,100);
+		contextoRenderizacao.fillStyle = 'green';	// setando a cor	
+		contextoRenderizacao.fillRect(larguraJanela/2-50, alturaJanela/2-50, 100, 100);	// Desenhando o retangulo
+		//contextoRenderizacao.fillStyle = "#ffffff";
+		//console.log("olha a pedra");
+		//contextoRenderizacao.font = "50px Arial";
+		//contextoRenderizacao.fillText("GO", 100,100);
 	}
 
 	// O jogo esta executando?
@@ -336,13 +338,18 @@ function desenha(){
 	// O jogo acabou?
 	else if(estadoJogo == estado.terminou){
 
-		// Exibe a tela vermelha de fim de jogo
-		//contextoRenderizacao.fillStyle = 'red';	// Seta a cor
-		//contextoRenderizacao.fillRect(larguraJanela/2-50, alturaJanela/2-50, 100, 100 );	// Desenha o retangulo
-		console.log("flag 342");
+		//Exibe a tela vermelha de fim de jogo
+		contextoRenderizacao.fillStyle = 'red';	// Seta a cor
+		contextoRenderizacao.fillRect(0, alturaJanela/2-50, larguraJanela, 100 );	// Desenha o retangulo
+		contextoRenderizacao.fillStyle = "#ffffff";
+		contextoRenderizacao.font = "50px Arial";
+		contextoRenderizacao.fillText(cron.final, larguraJanela/3, alturaJanela/2+alturaJanela/35);
+		
 	}
-	
+
 	areaPlacar.desenha();						// Desenha a area que exibe o placar
+	
+	
 }
 
 
