@@ -83,6 +83,8 @@ areaPlacar = {
 	largura: larguraJanela,
 	altura: 100,
 
+	recorde:0,
+
 	desenha: function(){
 		contextoRenderizacao.fillStyle = "blue";
 		contextoRenderizacao.fillRect(this.x, this.y, larguraJanela, this.altura,);
@@ -362,6 +364,10 @@ function main(){
 	contextoRenderizacao = areaDeJogo.getContext("2d");					// Contexto de renderização é 2D
 	estadoJogo = estado.aIniciar;				// O jogo rece o status pronto para iniciar
 	document.addEventListener("keydown", teclado);	// Associa a funcao teclado ao evento de pressionamento do teclado "keydown"
+
+	areaPlacar.recorde = localStorage.getItem("record");
+	if(areaPlacar.recorde == null)
+		areaPlacar.recorde = "00:00:00";
 		
 	roda();										// Executa o jogo
 }
