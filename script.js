@@ -20,7 +20,6 @@ nave = {
 	altura: 50,									// Altura da nave
 	largura: 50,								// Largura da nave
 	velocidadeDesvio: 25,						// Velocidade da nave para os lados
-	tempo: 0,
 	cor: "#009900",								// Cor da nave
 
 
@@ -35,7 +34,7 @@ nave = {
 	reset: function(){
 		this.x = 50;
 		this.y = alturaJanela/2 - 25;
-		this.tempo = 0;
+		
 	},
 
 
@@ -82,8 +81,26 @@ areaPlacar = {
 	y: 0,
 	largura: larguraJanela,
 	altura: 100,
-
 	recorde:0,
+
+
+	inic: function(){
+		this.recorde = localStorage.getItem("recorde");
+		if(this.recorde == null){
+			this.recorde = "00:00:00";
+		}
+	},
+
+
+	analisTemp: function(rec){
+		if(rec>this.recorde){
+			localStorage.setItem("recorde", rec);
+			this.recorde = rec;
+		}
+		console.log(rec);
+		console.log(localStorage.getItem("recorde"));
+	},
+
 
 	desenha: function(){
 		contextoRenderizacao.fillStyle = "blue";
@@ -96,15 +113,18 @@ areaPlacar = {
 },
 
 
+
 cron = {
-	disp: 0,
-	hors: 0,
-	mins: 0,
-	segs: 0,
+	disp: 0,									// Flag que indica se o cronometro esta executando
+	hors: 0,									// Contador de horas
+	mins: 0,									// Contador de minutos
+	segs: 0,									// Contador de segundos
 	final: 0,
 
 
+	// Metodo que formata a exibição de numeros menores do que 10
 	formatVis: function(n){
+		// Se o digito estiver entre 0 e 9, adiciona um '0' a esquerda
 		if(String(n).length<2)
 			return "0" + n;
 		else
@@ -112,6 +132,7 @@ cron = {
 	},
 
 
+	// Metodo que exibe as informacoes do cronometro no formato (HH:MM:SS)
 	mostrVis: function(){
 		return this.formatVis(this.hors) +
 		":" + this.formatVis(this.mins) +
@@ -119,11 +140,12 @@ cron = {
 	},
 
 
+	// Metodo para resetar o cronometro
 	resetCron: function(){
-		this.disp = 0;
-		this.hors = 0;
-		this.mins = 0;
-		this.segs = 0;
+		this.disp = 0;							// Resetando a flag de disparo
+		this.hors = 0;							// Resetando as horas
+		this.mins = 0;							// Resetando os minutos
+		this.segs = 0;							// Resetando os segundos
 	}
 },
 
@@ -157,9 +179,7 @@ arrMeteoritos = {
 		for(var i=0, tam = this.meteoritos.length; i<tam; i++){
 			met = this.meteoritos[i];
 			contextoRenderizacao.fillStyle = met.cor;					// Recebendo a cor definida
-			
-			// Desenhando o meteorio
-			contextoRenderizacao.fillRect(met.x, met.y, met.largura, met.altura);
+			contextoRenderizacao.fillRect(met.x, met.y, met.largura, met.altura);	// Desenhando o meteorio
 		}
 	},
 
@@ -195,19 +215,24 @@ arrMeteoritos = {
 
 	// Metodo para resetar o array depois que o jogo terminar
 	limpa: function(){
-		this.meteoritos = [];					// Reseta o array
-
+		this.meteoritos = [];					// Reseta o array de meteoritos
 	}
 						
 };
 
 
+
+// Metodo que roda o cronometro
 function execCron(){
-	cron.segs++;
+	cron.segs++;								// Incrementa 1 segundo
+
+	// Incremementa os minutos se os segundos chegarem a 60
 	if(cron.segs > 59){
 		cron.segs = 0;
 		cron.mins++;
 	}
+
+	// Incremementa as horas se os minutos chegarem a 60
 	if(cron.mins > 59){
 		cron.mins = 0;
 		cron.hors++;
@@ -275,8 +300,8 @@ function teclado(){
 	// O jogo terminou e o usuario apertou a tecla ENTER?
 	else if(estadoJogo == estado.terminou && event.key == "Enter"){
 		estadoJogo = estado.aIniciar;			// O estado do jogo é setado pronto para iniciar nova partida
-		arrMeteoritos.limpa();					// Reseta o array de meteoritos
-		cron.resetCron();
+		arrMeteoritos.limpa();					// Reseta o array de meteoritos para a proxima partida
+		
 	}
 		
 }
@@ -297,6 +322,8 @@ function atualiza(){
 	// O jogo esta executando?
 	if(estadoJogo == estado.rodando){
 		arrMeteoritos.atualiza();				// Atualiza o array de meteoritos
+
+		// Se o cronometro nao estiver executando o aciona
 		if(!cron.disp){
 			cron.disp = setInterval(execCron, 1000);
 		}
@@ -304,10 +331,15 @@ function atualiza(){
 
 	// O jogador perdeu?
 	else if(estadoJogo == estado.terminou){
-		nave.reset();
-		cron.final = cron.mostrVis();
-		if(cron.disp)
-			clearInterval(cron.disp);
+		
+		// Se o cronometro ainda estiver executando, cancela o timer
+		if(cron.disp){
+			nave.reset();						// Resetando o estado da nave
+			cron.final = cron.mostrVis();		// Recebendo o placar final
+			areaPlacar.analisTemp(cron.final);	// Analisando a pontuacao(tempo) do player
+			clearInterval(cron.disp);			// Parando a execucao do cronometro
+			cron.resetCron();					// Resetando o cronometro para a proxima partida	
+		}
 	}
 }
 
@@ -317,40 +349,39 @@ function desenha(){
 	contextoRenderizacao.fillStyle = '#06004c';	// Definindo a cor de fundo do jogo
 	contextoRenderizacao.fillRect(0, 0, larguraJanela, alturaJanela);	// Desenhamdo o fundo do jogo (o espaço)
 
-	
-
 	// O jogo esta pronto para iniciar?
 	if(estadoJogo == estado.aIniciar){
 
 		// Exibe uma tela verde de inicio de jogo
 		contextoRenderizacao.fillStyle = 'green';	// setando a cor	
 		contextoRenderizacao.fillRect(larguraJanela/2-50, alturaJanela/2-50, 100, 100);	// Desenhando o retangulo
-		//contextoRenderizacao.fillStyle = "#ffffff";
-		//console.log("olha a pedra");
-		//contextoRenderizacao.font = "50px Arial";
-		//contextoRenderizacao.fillText("GO", 100,100);
 	}
 
 	// O jogo esta executando?
 	else if(estadoJogo == estado.rodando){
 		nave.desenha();							// Desenha a nave
 		arrMeteoritos.desenha();				// Desenha os meteoritos
+		areaPlacar.desenha();						// Desenha a area que exibe o placar
 	}
 	
 	// O jogo acabou?
 	else if(estadoJogo == estado.terminou){
 
+		contextoRenderizacao.fillStyle = 'green';	// Setando a cor
+		contextoRenderizacao.fillRect(0, alturaJanela/2-175, larguraJanela, 100 );	// Desenhando o retangulo
+		contextoRenderizacao.fillStyle = "#ffffff";						// Setando a cor do placar
+		contextoRenderizacao.font = "50px Arial";						// Setando a fonte
+		contextoRenderizacao.fillText("Recorde: " + localStorage.getItem("recorde"), larguraJanela/6, alturaJanela/3.16);	// Escrevendo o texto
+		
 		//Exibe a tela vermelha de fim de jogo
-		contextoRenderizacao.fillStyle = 'red';	// Seta a cor
-		contextoRenderizacao.fillRect(0, alturaJanela/2-50, larguraJanela, 100 );	// Desenha o retangulo
-		contextoRenderizacao.fillStyle = "#ffffff";
-		contextoRenderizacao.font = "50px Arial";
-		contextoRenderizacao.fillText(cron.final, larguraJanela/3, alturaJanela/2+alturaJanela/35);
+		contextoRenderizacao.fillStyle = 'red';	// Setando a cor
+		contextoRenderizacao.fillRect(0, alturaJanela/2-50, larguraJanela, 100 );	// Desenhando o retangulo
+		contextoRenderizacao.fillStyle = "#ffffff";						// Setando a cor do placar
+		contextoRenderizacao.font = "50px Arial";						// Setando a fonte
+		contextoRenderizacao.fillText(cron.final, larguraJanela/3, alturaJanela/2+alturaJanela/35);	// Escrevendo o texto
 		
 	}
 
-	areaPlacar.desenha();						// Desenha a area que exibe o placar
-	
 	
 }
 
@@ -364,11 +395,7 @@ function main(){
 	contextoRenderizacao = areaDeJogo.getContext("2d");					// Contexto de renderização é 2D
 	estadoJogo = estado.aIniciar;				// O jogo rece o status pronto para iniciar
 	document.addEventListener("keydown", teclado);	// Associa a funcao teclado ao evento de pressionamento do teclado "keydown"
-
-	areaPlacar.recorde = localStorage.getItem("record");
-	if(areaPlacar.recorde == null)
-		areaPlacar.recorde = "00:00:00";
-		
+	areaPlacar.inic();
 	roda();										// Executa o jogo
 }
 
