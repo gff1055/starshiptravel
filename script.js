@@ -3,6 +3,7 @@ larguraJanela = inicializa()["largura"],		// Recebe a largura da janela do jogo
 alturaJanela = inicializa()["altura"],			// Recebe a altura da janela do jogo
 frames = 0,
 estadoJogo,										// Armazena o estado atual do jogo
+img,
 
 // Estados do jogo
 estado = {
@@ -12,21 +13,36 @@ estado = {
 },
 
 
+fundo = {
+	x:0,
+
+
+	desenha: function(){
+		spriteEspaco.desenha(0,0);
+	},
+
+	atualiza: function(){
+		x -= 2;
+	}
+},
+
+
 
 // Objeto que representa a nave
 nave = {
 	x: 50,										// Posicao horizontal da nave na area de jogo
 	y: alturaJanela/2 - 25,						// Posicao vertical da nave na area do jogo
-	altura: 50,									// Altura da nave
-	largura: 50,								// Largura da nave
+	altura: spriteNave.altura,									// Altura da nave
+	largura: spriteNave.largura,								// Largura da nave
 	velocidadeDesvio: 25,						// Velocidade da nave para os lados
 	cor: "#009900",								// Cor da nave
 
 
 	// Metodo para desenhar a nave
 	desenha: function(){
-		contextoRenderizacao.fillStyle = this.cor;						// Definindo a cor da nave
-		contextoRenderizacao.fillRect(this.x, this.y, this.altura, this.largura);	// Desenhando a nave
+		//contextoRenderizacao.fillStyle = this.cor;						// Definindo a cor da nave
+		//contextoRenderizacao.fillRect(this.x, this.y, this.altura, this.largura);	// Desenhando a nave
+		spriteNave.desenha(this.x, this.y);
 	},
 
 
@@ -34,7 +50,6 @@ nave = {
 	reset: function(){
 		this.x = 50;
 		this.y = alturaJanela/2 - 25;
-		
 	},
 
 
@@ -81,7 +96,8 @@ areaPlacar = {
 	y: 0,
 	largura: larguraJanela,
 	altura: 100,
-	recorde:0,
+	recorde: 0,
+	novoRecorde: false,
 
 
 	inic: function(){
@@ -96,7 +112,11 @@ areaPlacar = {
 		if(rec>this.recorde){
 			localStorage.setItem("recorde", rec);
 			this.recorde = rec;
+			this.novoRecorde = true;
 		}
+
+		else this.novoRecorde = false;
+		
 		console.log(rec);
 		console.log(localStorage.getItem("recorde"));
 	},
@@ -106,7 +126,7 @@ areaPlacar = {
 		contextoRenderizacao.fillStyle = "blue";
 		contextoRenderizacao.fillRect(this.x, this.y, larguraJanela, this.altura,);
 		contextoRenderizacao.fillStyle = "#ffffff";
-		contextoRenderizacao.font = "50px Arial";
+		contextoRenderizacao.font = "50px Oxanium";
 		contextoRenderizacao.fillText(cron.mostrVis(), 10, 60);
 
 	},
@@ -165,11 +185,11 @@ arrMeteoritos = {
 		this.meteoritos.push({
 			x:larguraJanela,					// Posicao horizontal do meteorito
 			y:100 + Math.floor((alturaJanela - 150)*Math.random()),		// Posicao vertical do meteorito
-			largura: 50,						// Largura do meteorito
-			altura: 50,							// Altura do meteorito
+			largura: 87,						// Largura do meteorito
+			altura: 87,							// Altura do meteorito
 			cor: this.paletaCores[Math.floor(5 * Math.random())],		// Cor do meteorito
 		});
-		this.tempoChegaMeteorito = 15 + Math.floor(30 * Math.random());
+		this.tempoChegaMeteorito = 60 + Math.floor(60 * Math.random());
 	},
 
 	
@@ -315,9 +335,10 @@ function roda(){
 }
 
 
-// Metodo para atualizar o jogo
+// Metodo para atualizar o jogo e executar o cronometro
 function atualiza(){
 	frames++;
+	//fundo.desenha();
 
 	// O jogo esta executando?
 	if(estadoJogo == estado.rodando){
@@ -346,8 +367,9 @@ function atualiza(){
 
 // Funcao para desenhar os componentes do jogo
 function desenha(){
-	contextoRenderizacao.fillStyle = '#06004c';	// Definindo a cor de fundo do jogo
-	contextoRenderizacao.fillRect(0, 0, larguraJanela, alturaJanela);	// Desenhamdo o fundo do jogo (o espaço)
+	//contextoRenderizacao.fillStyle = '#06004c';	// Definindo a cor de fundo do jogo
+	//contextoRenderizacao.fillRect(0, 0, larguraJanela, alturaJanela);	// Desenhamdo o fundo do jogo (o espaço)
+	spriteEspaco.desenha(0,0);
 
 	// O jogo esta pronto para iniciar?
 	if(estadoJogo == estado.aIniciar){
@@ -361,23 +383,28 @@ function desenha(){
 	else if(estadoJogo == estado.rodando){
 		nave.desenha();							// Desenha a nave
 		arrMeteoritos.desenha();				// Desenha os meteoritos
-		areaPlacar.desenha();						// Desenha a area que exibe o placar
+		areaPlacar.desenha();					// Desenha a area que exibe o placar
 	}
 	
 	// O jogo acabou?
 	else if(estadoJogo == estado.terminou){
 
-		contextoRenderizacao.fillStyle = 'green';	// Setando a cor
+		contextoRenderizacao.fillStyle = 'green';						// Setando a cor
 		contextoRenderizacao.fillRect(0, alturaJanela/2-175, larguraJanela, 100 );	// Desenhando o retangulo
 		contextoRenderizacao.fillStyle = "#ffffff";						// Setando a cor do placar
-		contextoRenderizacao.font = "50px Arial";						// Setando a fonte
-		contextoRenderizacao.fillText("Recorde: " + localStorage.getItem("recorde"), larguraJanela/6, alturaJanela/3.16);	// Escrevendo o texto
+		contextoRenderizacao.font = "50px Oxanium";						// Setando a fonte
+		if(areaPlacar.novoRecorde == true)
+			mensagem = "NOVO RECORDE"
+		else
+			mensagem = "Recorde: " + localStorage.getItem("recorde");
+
+		contextoRenderizacao.fillText(mensagem, larguraJanela/6, alturaJanela/3.16);	// Escrevendo o texto
 		
 		//Exibe a tela vermelha de fim de jogo
 		contextoRenderizacao.fillStyle = 'red';	// Setando a cor
 		contextoRenderizacao.fillRect(0, alturaJanela/2-50, larguraJanela, 100 );	// Desenhando o retangulo
 		contextoRenderizacao.fillStyle = "#ffffff";						// Setando a cor do placar
-		contextoRenderizacao.font = "50px Arial";						// Setando a fonte
+		contextoRenderizacao.font = "50px Oxanium";						// Setando a fonte
 		contextoRenderizacao.fillText(cron.final, larguraJanela/3, alturaJanela/2+alturaJanela/35);	// Escrevendo o texto
 		
 	}
@@ -396,6 +423,8 @@ function main(){
 	estadoJogo = estado.aIniciar;				// O jogo rece o status pronto para iniciar
 	document.addEventListener("keydown", teclado);	// Associa a funcao teclado ao evento de pressionamento do teclado "keydown"
 	areaPlacar.inic();
+	img = new Image();
+	img.src = "imagens/SpriteSheet.png";
 	roda();										// Executa o jogo
 }
 
