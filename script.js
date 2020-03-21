@@ -16,13 +16,16 @@ estado = {
 fundo = {
 	x:0,
 
-
 	desenha: function(){
-		spriteEspaco.desenha(0,0);
+		spriteEspaco.desenha(this.x,0);
+		spriteEspaco.desenha(this.x + spriteEspaco.largura, 0);
 	},
 
 	atualiza: function(){
-		x -= 2;
+		if(this.x == -spriteEspaco.largura)
+			this.x = 0;
+		this.x = this.x-1;
+		console.log(this.x);
 	}
 },
 
@@ -115,10 +118,7 @@ areaPlacar = {
 			this.novoRecorde = true;
 		}
 
-		else this.novoRecorde = false;
-		
-		console.log(rec);
-		console.log(localStorage.getItem("recorde"));
+		else this.novoRecorde = false;	
 	},
 
 
@@ -342,6 +342,7 @@ function atualiza(){
 
 	// O jogo esta executando?
 	if(estadoJogo == estado.rodando){
+		fundo.atualiza();
 		arrMeteoritos.atualiza();				// Atualiza o array de meteoritos
 
 		// Se o cronometro nao estiver executando o aciona
@@ -369,14 +370,16 @@ function atualiza(){
 function desenha(){
 	//contextoRenderizacao.fillStyle = '#06004c';	// Definindo a cor de fundo do jogo
 	//contextoRenderizacao.fillRect(0, 0, larguraJanela, alturaJanela);	// Desenhamdo o fundo do jogo (o espaço)
-	spriteEspaco.desenha(0,0);
+	//spriteEspaco.desenha(0,0);
+	fundo.desenha();
 
 	// O jogo esta pronto para iniciar?
 	if(estadoJogo == estado.aIniciar){
 
 		// Exibe uma tela verde de inicio de jogo
-		contextoRenderizacao.fillStyle = 'green';	// setando a cor	
-		contextoRenderizacao.fillRect(larguraJanela/2-50, alturaJanela/2-50, 100, 100);	// Desenhando o retangulo
+		//contextoRenderizacao.fillStyle = 'green';	// setando a cor	
+		//contextoRenderizacao.fillRect(larguraJanela/2-50, alturaJanela/2-50, 100, 100);	// Desenhando o retangulo
+		spriteInicio.desenha(larguraJanela/2 - larguraJanela/3, alturaJanela/2 - alturaJanela/3);
 	}
 
 	// O jogo esta executando?
@@ -389,23 +392,28 @@ function desenha(){
 	// O jogo acabou?
 	else if(estadoJogo == estado.terminou){
 
-		contextoRenderizacao.fillStyle = 'green';						// Setando a cor
-		contextoRenderizacao.fillRect(0, alturaJanela/2-175, larguraJanela, 100 );	// Desenhando o retangulo
+		spriteJogadorTempo.desenha(larguraJanela/7, alturaJanela/6);
+		contextoRenderizacao.fillStyle = "#ffffff";						// Setando a cor do placar
+		contextoRenderizacao.font = "50px Oxanium";						// Setando a fonte
+		contextoRenderizacao.fillText(cron.final, larguraJanela/3, alturaJanela/3.16);	// Escrevendo o texto
+
+		//contextoRenderizacao.fillStyle = 'green';						// Setando a cor
+		//contextoRenderizacao.fillRect(0, alturaJanela/2-175, larguraJanela, 100 );	// Desenhando o retangulo
+		
 		contextoRenderizacao.fillStyle = "#ffffff";						// Setando a cor do placar
 		contextoRenderizacao.font = "50px Oxanium";						// Setando a fonte
 		if(areaPlacar.novoRecorde == true)
-			mensagem = "NOVO RECORDE"
-		else
-			mensagem = "Recorde: " + localStorage.getItem("recorde");
-
-		contextoRenderizacao.fillText(mensagem, larguraJanela/6, alturaJanela/3.16);	// Escrevendo o texto
+			spriteNovoRecorde.desenha(larguraJanela/7, alturaJanela/6);
+		else{
+			spriteMelhorTempo.desenha(larguraJanela/7, alturaJanela/2.6);
+			mensagem = localStorage.getItem("recorde");
+			contextoRenderizacao.fillText(mensagem, larguraJanela/3, alturaJanela/2 + alturaJanela/35);	// Escrevendo o texto
+		}
 		
 		//Exibe a tela vermelha de fim de jogo
-		contextoRenderizacao.fillStyle = 'red';	// Setando a cor
-		contextoRenderizacao.fillRect(0, alturaJanela/2-50, larguraJanela, 100 );	// Desenhando o retangulo
-		contextoRenderizacao.fillStyle = "#ffffff";						// Setando a cor do placar
-		contextoRenderizacao.font = "50px Oxanium";						// Setando a fonte
-		contextoRenderizacao.fillText(cron.final, larguraJanela/3, alturaJanela/2+alturaJanela/35);	// Escrevendo o texto
+//		contextoRenderizacao.fillStyle = 'red';	// Setando a cor
+//		contextoRenderizacao.fillRect(0, alturaJanela/2-50, larguraJanela, 100 );	// Desenhando o retangulo
+		
 		
 	}
 
