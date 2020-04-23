@@ -25,7 +25,6 @@ spriteNovoRecorde = new Sprite(500, 700, 441, 95);
 spriteMelhorTempo = new Sprite(0, 900, 441, 95);
 spriteJogadorTempo = new Sprite(0, 690, 441, 95);
 
-
 arrSpriteMeteoritos = [
 	new Sprite(1300, 0, 87, 87),
 	new Sprite(1300, 100, 87, 87),
